@@ -83,6 +83,15 @@
 
     <build>
         <finalName>medical-diagnosis-app</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/webapp</directory>
+                <targetPath>META-INF/resources</targetPath>
+                <includes>
+                    <include>**/*.jsp</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -90,4 +99,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
