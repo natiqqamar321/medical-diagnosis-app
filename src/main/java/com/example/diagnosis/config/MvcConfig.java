@@ -1,33 +1,30 @@
-package com.example.diagnosis.config; // Adjust package as per your project structure
+package com.example.diagnosis.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
-//@EnableWebMvc // Important for enabling Spring MVC
+@EnableWebMvc
 public class MvcConfig implements WebMvcConfigurer {
 
   @Bean
   public ViewResolver jspViewResolver() {
     InternalResourceViewResolver bean = new InternalResourceViewResolver();
-    // This prefix MUST match the path inside your JAR
-    // where JSPs are located (after the META-INF/resources/ part)
-    bean.setPrefix("/WEB-INF/views/"); // This should match what's in application.properties
+    bean.setPrefix("/WEB-INF/views/");
     bean.setSuffix(".jsp");
-    bean.setViewClass(JstlView.class); // Use JstlView for JSPs
+    bean.setViewClass(JstlView.class);
     return bean;
   }
 
-  // You might need to override addResourceHandlers if you have static resources
-  // but for now, let's focus on the JSP
-  // @Override
-  // public void addResourceHandlers(ResourceHandlerRegistry registry) {
-  //     registry.addResourceHandler("/static/**")
-  //             .addResourceLocations("classpath:/static/", "/static/"); // Example for static files
-  // }
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/static/**")
+            .addResourceLocations("classpath:/META-INF/resources/static/", "classpath:/static/");
+  }
 }

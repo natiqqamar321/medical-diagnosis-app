@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: medical-diagnosis-app
+    env: java
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/medical-diagnosis-app.jar
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: JAVA_OPTS
+        value: -Xmx512m -Xms256m 
