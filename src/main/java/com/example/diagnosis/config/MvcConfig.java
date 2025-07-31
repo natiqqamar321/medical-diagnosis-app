@@ -16,8 +16,7 @@ public class MvcConfig implements WebMvcConfigurer {
   @Bean
   public ViewResolver jspViewResolver() {
     InternalResourceViewResolver bean = new InternalResourceViewResolver();
-    // For JAR deployment, we need to handle the META-INF/resources structure
-    bean.setPrefix("/META-INF/resources/WEB-INF/views/");
+    bean.setPrefix("/WEB-INF/views/");
     bean.setSuffix(".jsp");
     bean.setViewClass(JstlView.class);
     return bean;
@@ -26,6 +25,6 @@ public class MvcConfig implements WebMvcConfigurer {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/static/**")
-            .addResourceLocations("classpath:/META-INF/resources/static/", "classpath:/static/");
+            .addResourceLocations("/static/");
   }
 }

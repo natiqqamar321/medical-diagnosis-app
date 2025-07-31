@@ -3,7 +3,7 @@ services:
     name: medical-diagnosis-app
     env: java
     buildCommand: mvn clean package -DskipTests
-    startCommand: java -jar target/medical-diagnosis-app.jar
+    startCommand: java -jar target/medical-diagnosis-app.war
     envVars:
       - key: PORT
         value: 8080
