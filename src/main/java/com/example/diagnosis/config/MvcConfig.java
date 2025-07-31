@@ -16,7 +16,8 @@ public class MvcConfig implements WebMvcConfigurer {
   @Bean
   public ViewResolver jspViewResolver() {
     InternalResourceViewResolver bean = new InternalResourceViewResolver();
-    bean.setPrefix("/WEB-INF/views/");
+    // For JAR deployment, we need to handle the META-INF/resources structure
+    bean.setPrefix("/META-INF/resources/WEB-INF/views/");
     bean.setSuffix(".jsp");
     bean.setViewClass(JstlView.class);
     return bean;
