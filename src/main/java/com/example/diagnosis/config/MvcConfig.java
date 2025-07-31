@@ -9,7 +9,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
-@EnableWebMvc // Important for enabling Spring MVC
+//@EnableWebMvc // Important for enabling Spring MVC
 public class MvcConfig implements WebMvcConfigurer {
 
   @Bean
@@ -17,7 +17,7 @@ public class MvcConfig implements WebMvcConfigurer {
     InternalResourceViewResolver bean = new InternalResourceViewResolver();
     // This prefix MUST match the path inside your JAR
     // where JSPs are located (after the META-INF/resources/ part)
-    bean.setPrefix("/META-INF/resources/WEB-INF/views/"); // This should match what's in application.properties
+    bean.setPrefix("/WEB-INF/views/"); // This should match what's in application.properties
     bean.setSuffix(".jsp");
     bean.setViewClass(JstlView.class); // Use JstlView for JSPs
     return bean;
