@@ -81,7 +81,7 @@
                         <h2>Medical Details</h2>
                         
                         <div class="form-group">
-                            <label for="symptoms">Symptoms *</label>
+                            <label for="symptoms">Signs and Symptoms *</label>
                             <textarea id="symptoms" name="symptoms" required rows="4"
                                       placeholder="Describe all symptoms in detail..."></textarea>
                         </div>

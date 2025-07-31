@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -20,20 +19,10 @@ public class DiagnosisService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosisService.class);
 
-    private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String API_KEY = "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";
+    private static final String GROQ_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    private final String groqApiKey = "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";
 
-    // ✅ Prioritized free models (as of July 2025)
-    private static final List<String> MODEL_PRIORITY_LIST = Arrays.asList(
-        "mistralai/mistral-7b-instruct:free",
-        "meta-llama/llama-3-8b-instruct:free",
-        "google/gemma-7b-it:free",
-        "openchat/openchat-3.5:free",
-        "gryphe/mythomax-l2-13b:free",
-        "undi95/toppy-m-7b:free",
-        "open-orca/mistral-7b-openorca:free",
-        "nousresearch/nous-capybara-7b:free"
-    );
+    private static final String MODEL = "gpt-4o";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -41,60 +30,50 @@ public class DiagnosisService {
         String systemPrompt = buildSystemPrompt();
         String userMessage = buildUserMessage(patient);
 
-        for (String model : MODEL_PRIORITY_LIST) {
-            try {
-                logger.info("🧪 Trying model: {}", model);
-                JSONObject payload = createRequestPayload(systemPrompt, userMessage, model);
+        try {
+            logger.info("🧠 Using model: {}", MODEL);
+            JSONObject payload = createRequestPayload(systemPrompt, userMessage);
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.setBearerAuth(API_KEY);
-                headers.set("X-Title", "Free Diagnosis");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(groqApiKey);
 
-                HttpEntity<String> request = new HttpEntity<>(payload.toString(), headers);
-                ResponseEntity<String> response = restTemplate.postForEntity(OPENROUTER_API_URL, request, String.class);
+            HttpEntity<String> request = new HttpEntity<>(payload.toString(), headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(GROQ_API_URL, request, String.class);
 
-                logger.info("📥 Response status: {} from model: {}", response.getStatusCode(), model);
+            logger.info("📥 Response status: {}", response.getStatusCode());
 
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    DiagnosisResult result = parseResponse(response.getBody());
-                    if (result != null && !"Unable to diagnose".equalsIgnoreCase(result.getDisease())) {
-                        logger.info("✅ Diagnosis successful with model: {}", model);
-                        return result;
-                    } else {
-                        logger.warn("⚠️ Model {} gave incomplete or invalid result.", model);
-                    }
+            if (response.getStatusCode() == HttpStatus.OK) {
+                DiagnosisResult result = parseResponse(response.getBody());
+                if (result != null && !"Unable to diagnose".equalsIgnoreCase(result.getDisease())) {
+                    logger.info("✅ Diagnosis successful");
+                    return result;
                 } else {
-                    logger.warn("❌ Model {} returned status: {}", model, response.getStatusCode());
+                    logger.warn("⚠️ Incomplete or invalid diagnosis.");
                 }
-
-            } catch (HttpClientErrorException e) {
-                logger.warn("⚠️ Model {} failed with HTTP {}: {}", model, e.getStatusCode(), e.getResponseBodyAsString());
-                if (e.getStatusCode() == HttpStatus.BAD_REQUEST || e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                    continue; // Try next model
-                }
-            } catch (Exception e) {
-                logger.error("💥 Model {} threw exception: {}", model, e.getMessage(), e);
+            } else {
+                logger.warn("❌ Request failed with status: {}", response.getStatusCode());
             }
+
+        } catch (Exception e) {
+            logger.error("💥 Exception during diagnosis: {}", e.getMessage(), e);
         }
 
-        logger.error("🚫 All models failed. Returning fallback response.");
-        return createErrorResult("All models failed or rate-limited. Try again shortly.");
+        return createErrorResult("Diagnosis failed. Try again later.");
     }
 
     private String buildSystemPrompt() {
-        return "You are a highly knowledgeable medical AI assistant. Based on patient information provided, "
-            + "return a structured JSON object like this:\n"
+        return "You are a medical diagnosis assistant. Based on the provided patient information, respond strictly in this JSON format:\n"
             + "{\n"
-            + "  \"disease\": \"Most likely condition\",\n"
-            + "  \"cause\": \"Cause of the condition\",\n"
-            + "  \"cure\": \"Treatment plan\",\n"
+            + "  \"disease\": \"Name of likely disease\",\n"
+            + "  \"cause\": \"Cause of the disease\",\n"
+            + "  \"cure\": \"Suggested treatment\",\n"
             + "  \"medicines\": [\"Medicine1\", \"Medicine2\"],\n"
             + "  \"severity\": \"Mild/Moderate/Severe\",\n"
-            + "  \"recommendations\": \"Care advice\",\n"
-            + "  \"precautions\": \"Precautionary steps\",\n"
+            + "  \"recommendations\": \"General recommendations\",\n"
+            + "  \"precautions\": \"Precautions to take\",\n"
             + "  \"requiresImmediateAttention\": true/false\n"
-            + "}\nRespond ONLY with this JSON structure.";
+            + "}\nReturn only the JSON response.";
     }
 
     private String buildUserMessage(Patient patient) {
@@ -118,13 +97,13 @@ public class DiagnosisService {
         if (patient.getCurrentMedications() != null)
             sb.append("Current Medications: ").append(patient.getCurrentMedications()).append("\n");
 
-        sb.append("\nReturn diagnosis using the JSON structure above.");
+        sb.append("\nRespond strictly in JSON format as described.");
         return sb.toString();
     }
 
-    private JSONObject createRequestPayload(String systemPrompt, String userMessage, String model) {
+    private JSONObject createRequestPayload(String systemPrompt, String userMessage) {
         JSONObject payload = new JSONObject();
-        payload.put("model", model);
+        payload.put("model", MODEL);
 
         JSONArray messages = new JSONArray();
         messages.put(new JSONObject().put("role", "system").put("content", systemPrompt));
@@ -148,7 +127,7 @@ public class DiagnosisService {
                 return mapJsonToDiagnosisResult(new JSONObject(jsonText));
             }
         } catch (Exception e) {
-            logger.error("❌ Failed to parse OpenRouter response: {}", e.getMessage(), e);
+            logger.error("❌ Failed to parse Groq response: {}", e.getMessage(), e);
         }
         return null;
     }

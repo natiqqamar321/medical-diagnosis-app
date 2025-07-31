@@ -149,7 +149,7 @@
     </div>
 
     <footer class="footer">
-        <p>&copy; 2024 Medical Diagnosis System. Patient data is stored securely and confidentially.</p>
+        <p>&copy; 2025 Medical Diagnosis System. Patient data is stored securely and confidentially.</p>
     </footer>
 
     <!-- Scripts -->
