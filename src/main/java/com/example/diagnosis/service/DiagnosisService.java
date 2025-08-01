@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,9 +19,11 @@ import java.util.regex.Pattern;
 public class DiagnosisService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosisService.class);
+    @Value("${groq.api.key}")
+    private String groqApiKey;
+
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-    private final String groqApiKey = "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";
     private static final String MODEL = "llama3-70b-8192";
 
     private final RestTemplate restTemplate = new RestTemplate();
