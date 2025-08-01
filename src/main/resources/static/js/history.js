@@ -310,7 +310,7 @@ function buildPatientDetailsModal(name, date, details) {
             </div>
             
             <div class="modal-actions">
-                <button class="btn-secondary" onclick="printPatientDetails('${name}', '${date}')">
+                <button class="btn-secondary" onclick="printPatientDetails('${name}')">
                     Print Details
                 </button>
                 <button class="btn-primary" onclick="closeModal()">
@@ -323,7 +323,7 @@ function buildPatientDetailsModal(name, date, details) {
     return html;
 }
 
-function printPatientDetails(name, date) {
+function printPatientDetails(name) {
     const modalContent = $('#modal-body').html();
     const printWindow = window.open('', '_blank');
     
