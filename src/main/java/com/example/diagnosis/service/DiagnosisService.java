@@ -19,10 +19,9 @@ public class DiagnosisService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosisService.class);
 
-    private static final String GROQ_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private final String groqApiKey = "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";
-
-    private static final String MODEL = "gpt-4o";
+    private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private final String groqApiKey = "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";
+    private static final String MODEL = "llama3-70b-8192";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -36,7 +35,8 @@ public class DiagnosisService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(groqApiKey);
+            headers.set("User-Agent", "Mozilla/5.0");
+            headers.setBearerAuth(groqApiKey); // ✅ Uses Groq Bearer token
 
             HttpEntity<String> request = new HttpEntity<>(payload.toString(), headers);
             ResponseEntity<String> response = restTemplate.postForEntity(GROQ_API_URL, request, String.class);
